@@ -1,16 +1,15 @@
-title:              Clean Blog
-email:              your-email@example.com
-description:        A Blog Theme by Start Bootstrap
-author:             Start Bootstrap
+title:              깡느의 놀이터
+email:              lkd0527@google.com
+description:        깡느의 일상 다반사
+author:             Kkangnu
 baseurl:            ""
 url:                "https://Kkangnu.github.io"
 
 # Social Profiles
-twitter_username:   SBootstrap
-github_username:    StartBootstrap
-facebook_username:  StartBootstrap
-instagram_username:  
-linkedin_username:
+github_username:    https://Kkangnu.github.com`
+#facebook_username:
+#instagram_username:
+#linkedin_username:
 
 # Add your google-analytics ID here to activate google analytics
 google_analytics:   UA-XXXXXXXXX-X # out your google-analytics code
