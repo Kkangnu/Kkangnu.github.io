@@ -12,7 +12,7 @@ tag: [Jekyll]
 ### Liquid is where Jekyll starts to get more interesting. Liquid is a templating language which has three main parts: objects, tags and filters.
 
 ## Objects
-### Objects tell Liquid where to output content. They’re denoted by double curly braces: {{ and }}. For example:
+### Objects tell Liquid where to output content. They’re denoted by double curly braces: ```{{ and }}```. For example:
 ```
 {{ page.title }}
 ```
@@ -20,7 +20,7 @@ tag: [Jekyll]
 ### Outputs a variable called page.title on the page.
 
 ## Tags
-### Tags create the logic and control flow for templates. They are denoted by curly braces and percent signs: {% and %}. For example:
+### Tags create the logic and control flow for templates. They are denoted by curly braces and percent signs: ```{% and %}```. For example:
 ```
 {% if page.show_sidebar %}
 
