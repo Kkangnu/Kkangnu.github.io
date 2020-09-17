@@ -30,11 +30,14 @@ layout: default
 <ul class="posts-list">
   
   {% assign category = page.category | default: page.title %}
-  <a>{{site}}</a>
-  <a>{{site.categories}}</a>
-  <a>{{site.post}}</a>
-  {% for post in site.categories[category] %}
-  <a>{{post.title}}</a>
+  {% for cart in site.categories[category] %}
+  <h3>{{ cart[0] }}</h3>
+    <ul>
+    {% for post in cart[1] %}
+      <li><a href="{{ post.url }}">{{ post.title }}</a></li>
+    {% endfor %}
+  </ul>
+  <a>{{category}}</a>
     <li>
       <h3>
         <a href="{{ site.baseurl }}{{ post.url }}">
