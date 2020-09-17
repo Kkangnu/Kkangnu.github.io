@@ -13,7 +13,7 @@ tag: [Jekyll]
 
 ## Objects
 ### Objects tell Liquid where to output content. They’re denoted by double curly braces: 
-<pre><code>{{ and }}</code></pre>
+<pre><code>{{  }}</code></pre>
 
 For example:
 ```
