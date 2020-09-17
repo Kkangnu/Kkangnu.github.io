@@ -70,7 +70,7 @@ Open `_layouts/default.html` and add the stylesheet to the `<head>`:
     <link rel="stylesheet" href="/assets/css/styles.css">
   </head>
   <body>
-    {% include navigation.html %}
+    { % include navigation.html % }
     {{ content }}
   </body>
 </html>
