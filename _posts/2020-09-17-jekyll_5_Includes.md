@@ -46,7 +46,7 @@ Try using the include tag to add the navigation to _layouts/default.html:
     <title>{{ page.title }}</title>
   </head>
   <body>
-    {% include navigation.html %}
+    {% .include navigation.html %}
     {{ content }}
   </body>
 </html>
