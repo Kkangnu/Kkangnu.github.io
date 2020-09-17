@@ -15,7 +15,7 @@ tag: [Jekyll]
 ### Objects tell Liquid where to output content. They’re denoted by double curly braces: 
 <pre><code>{{ and }}</code></pre>
 
-. For example:
+For example:
 ```
 {{ page.title }}
 ```
@@ -26,7 +26,7 @@ tag: [Jekyll]
 ### Tags create the logic and control flow for templates. They are denoted by curly braces and percent signs
 <pre><code>{% and %}</code></pre>
 ```
-. For example:
+For example:
 ```
 {% if page.show_sidebar %}
 
