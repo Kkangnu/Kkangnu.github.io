@@ -31,13 +31,14 @@ Navigation source code can get complex, so sometimes it’s nice to move it into
 
 
 
-
+```
 <nav>
   <a href="/">Home</a>
   <a href="/about.html">About</a>
 </nav>
+```
 Try using the include tag to add the navigation to _layouts/default.html:
-
+```
 <!doctype html>
 <html>
   <head>
@@ -49,6 +50,7 @@ Try using the include tag to add the navigation to _layouts/default.html:
     {{ content }}
   </body>
 </html>
+```
 Open http://localhost:4000 in your browser and try switching between the pages.
 Current page highlightingPermalink
 Let’s take this a step further and highlight the current page in the navigation.
@@ -56,7 +58,7 @@ Let’s take this a step further and highlight the current page in the navigatio
 _includes/navigation.html needs to know the URL of the page it’s inserted into so it can add styling. Jekyll has useful variables available, one of which is page.url.
 
 Using page.url you can check if each link is the current page and color it red if true:
-
+```
 <nav>
   <a href="/" {% if page.url == "/" %}style="color: red;"{% endif %}>
     Home
@@ -65,6 +67,7 @@ Using page.url you can check if each link is the current page and color it red i
     About
   </a>
 </nav>
+```
 Take a look at http://localhost:4000 and see your red link for the current page.
 
 There’s still a lot of repetition here if you wanted to add a new item to the navigation or change the highlight color. In the next step we’ll address this.
