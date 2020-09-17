@@ -328,9 +328,9 @@ In the `build` (or `serve`) arguments, you can specify a Jekyll environment and 
 For example, suppose you set this conditional statement in your code:
 
 ```
-{% if jekyll.environment == "production" %}
-   {% include disqus.html %}
-{% endif %}
+{ % if jekyll.environment == "production" % }
+   { % include disqus.html % }
+{ % endif % }
 ```
 
 When you build your Jekyll site, the content inside the `if` statement won’t be run unless you also specify a `production` environment in the build command, like this:
