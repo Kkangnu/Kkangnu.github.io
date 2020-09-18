@@ -18,7 +18,7 @@ layout: default
             {% endif %}
             <span class="meta">Posted by
               <a href="#">{% if page.author %}{{ page.author }}{% else %}{{ site.author }}{% endif %}</a>
-              on {{ page.date | date: '%y %m, %d' }} &middot; {% include read_time.html
+              on {{ page.date | date: '%Y/%m/%d' }} &middot; {% include read_time.html
               content=page.content %}
             </span>
           </div>
@@ -30,22 +30,16 @@ layout: default
 <ul class="posts-list">
   
   {% assign category = page.category | default: page.title %}
-  {% for cart in site.categories[category] %}
-  <h3>{{ cart[0] }}</h3>
-    <ul>
-    {% for post in cart[1] %}
-      <li><a href="{{ post.url }}">{{ post.title }}</a></li>
-    {% endfor %}
-  </ul>
-  <a>{{category}}</a>
-    <li>
-      <h3>
-        <a href="{{ site.baseurl }}{{ post.url }}">
-          {{ post.title }}
-        </a>
-        <small>{{ post.date | date_to_string }}</small>
-      </h3>
-    </li>
+  {% for post in site.categories[category] %}
+  <li>
+    <h3>
+      <a href="{{ site.baseurl }}{{ post.url }}">
+        {{ post.title }}
+      </a>
+      <small>{{ post.date | date: '%Y/%m/%d' }} </small>
+    </h3>
+  </li>
+  
   {% endfor %}
   
 </ul>
