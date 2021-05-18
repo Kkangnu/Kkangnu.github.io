@@ -21,7 +21,7 @@ tag: [iOS]
 
   이 문서는 “마블 다이어그램”을 활용해서 관련 내용을 설명한다. 아래는 마블 다이어그램이 어떻게 Observable과 Observable의 전환을 표현하는지 보여준다.
 
-  ![img](./img/posts/reswift/2021/observable1.png)
+  ![img](/img/posts/reswift/2021/observable1.png)
 
   #### 참고
 
