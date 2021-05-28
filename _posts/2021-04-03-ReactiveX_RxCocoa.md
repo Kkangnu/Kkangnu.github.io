@@ -86,55 +86,40 @@ RxCocoa에서 Traits 는 아래와 같은 특징들을 갖습니다.
 
 bind(to:) 메소드는 메인스레드 실행을 보장함.
 
+ ```swift
+ textField.rx.text
+   .orEmpty
+   .subscribe(onNext: { [weak self] str in
+     DispatchQueue.main.async {
+       self?.valueLabel.text = str
+     }
+   })
+   .disposed(by: disposedBag)
  
-
-textField.rx.text
-
-  .orEmpty
-
-  .subscribe(onNext: { [**weak** **self**] str **in**
-
-​    DispatchQueue.main.async {
-
-​      **self**?.valueLabel.text = str
-
-​    }
-
-  })
-
-  .disposed(by: disposedBag)
-
  
+ textField.rx.text
+   .orEmpty
+   .observeOn(MainScheduler.instance)
+   .subscribe(onNext: { [weak self] str in
+     self?.valueLabel.text = str
+   })
+   .disposed(by: disposeBag)
+ ```
 
-textField.rx.text
 
-  .orEmpty
 
-  .observeOn(MainScheduler.instance)
 
-  .subscribe(onNext: { [**weak** **self**] str **in**
-
-​    **self**?.valueLabel.text = str
-
-  })
-
-  .disposed(by: disposeBag)
 
 위와 같이 main Thread로 전환하고 subscribe 할 필요 없이 bind를 이용하면 두 가지 모두 한번에 해결된다.
 
-**textField**.rx.text
-
-  .orEmpty
-
-  .bind(**to**: **valueLabel**.rx.text)
-
-  .disposed(**by**: **disposeBag**)
+| **textField**.rx.text<br />.orEmpty<br />.bind(**to**: **valueLabel**.rx.text)<br />.disposed(**by**: **disposeBag**) |
+| ------------------------------------------------------------ |
 
 즉 Binder를 이용하면 binding 작업을 언제나 Main Thread에서 실행해주기 때문에 쓰레드에 대한 관리를 해 줄 필요가 없다는 장점이 있음.
 
  
 
-**Beginning RxCocoa**
+### **Beginning RxCocoa**
 
 
 
@@ -154,7 +139,7 @@ textField.rx.text
 
  
 
-**RxCocoa****를 사용하여 데이터 표시하기**
+**RxCocoa** **를 사용하여 데이터 표시하기**
 
 
 
@@ -166,17 +151,12 @@ ApiController.swift에서 SON 데이터를 매핑할 데이터 모델로 쓰일 
 
 실질적으로 Weather 구조체 타입의 Observable을 반환하는 함수를 살펴보겠습니다.
 
-**func** **currentWeather**(city: String) -> **Observable**<**Weather**> {
-
-​    **return** **Observable**.just(**Weather**(cityName: city,
-
-​      temperature: 20,
-
-​      humidity: 90,
-
-​      icon: iconNameToChar(icon: "01d")))
-
-  }
+```swift
+func currentWeather(city: String) -> 
+	return Observable
+		.just(Weather(cityName: city,temperature: 20, humidity: 90, icon: iconNameToChar(icon: "01d")))
+}
+```
 
 날씨를 조회할 도시 이름을 인자로 전달받아 Weahter 타입의 Observable 구조체를 반환하는 함수입니다.
 
@@ -188,27 +168,19 @@ ApiController.swift에서 SON 데이터를 매핑할 데이터 모델로 쓰일 
 
 위 함수를 ViewController.swift 파일의 viewDidLoad() 메서드 내에서 호출해보도록 하겠습니다.
 
- 
+ ```swift
+ ApiController.shared.currentWeather(city: "RxSwift")
+     .observeOn(MainScheduler.instance)
+     .subscribe(onNext: { [weak self] data in
+       guard let self = self else { return }
+       self.tempLabel.text = "\(data.temperature)"
+       self.iconLabel.text = data.icon
+       self.humidityLabel.text = "\(data.humidity)"
+       self.cityNameLabel.text = data.cityName
+     })
+ ```
 
-**ApiController**.shared.currentWeather(city: "RxSwift")
 
-​    .observeOn(**MainScheduler**.instance)
-
-​    .subscribe(onNext: { [**weak** **self**] data **in**
-
-​      **guard** **let** **self** = **self** **else** { **return** }
-
-​      **self**.tempLabel.text = "\(data.temperature)"
-
-​      **self**.iconLabel.text = data.icon
-
-​      **self**.humidityLabel.text = "\(data.humidity)"
-
-​      **self**.cityNameLabel.text = data.cityName
-
-​    })
-
- 
 
 가져온 Weather 타입 데이터를 기반으로 UI에 뿌려주는 작업이므로 Main Thread 에서 실행해주었습니다.
 
@@ -229,31 +201,28 @@ ApiController.swift에서 SON 데이터를 매핑할 데이터 모델로 쓰일 
 
 따라서 disposeBag 객체를 생성하여 dispose를 아래와 같이 진행해줍니다.
 
-**private** **let** disposeBag = **DisposeBag**()
+```swift
+private let disposeBag = DisposeBag()
+```
 
- 
 
-**ApiController**.shared.currentWeather(city: "RxSwift")
 
-​      .observeOn(**MainScheduler**.instance)
+```swift
+ApiController.shared.currentWeather(city: "RxSwift")
+      .observeOn(MainScheduler.instance)
+      .subscribe(onNext: { [weak self] data in
+        guard let self = self else { return }
+        self.tempLabel.text = "\(data.temperature)"
+        self.iconLabel.text = data.icon
+        self.humidityLabel.text = "\(data.humidity)"
+        self.cityNameLabel.text = data.cityName
+      })
+      .disposed(by: disposeBag) 
+```
 
-​      .subscribe(onNext: { [**weak** **self**] data **in**
 
-​        **guard** **let** **self** = **self** **else** { **return** }
 
-​        **self**.tempLabel.text = "\(data.temperature)"
 
-​        **self**.iconLabel.text = data.icon
-
-​        **self**.humidityLabel.text = "\(data.humidity)"
-
-​        **self**.cityNameLabel.text = data.cityName
-
-​      })
-
-​      .disposed(by: disposeBag)
-
- 
 
 이는 ViewController 의 릴리즈 여부에 따라 구독 취소/dispose를 하게 됩니다.
 
@@ -265,35 +234,27 @@ ApiController.swift에서 SON 데이터를 매핑할 데이터 모델로 쓰일 
 
 두 번째 문제는 RxCocoa 프레임워크가 제공하는 rx 기능을 통해 textFiled 입력부분을 제어해보도록 합니다.
 
+```swift
 searchCityName.rx.text
+      .filter { ($0 ?? "").count > 0 }
+      .flatMapLatest { text in
+        return ApiController.shared.currentWeather(city: text ?? "Error")
+          .catchErrorJustReturn(ApiController.Weather.empty)
+      }
+      .observeOn(MainScheduler.instance)
+      .subscribe(onNext: { [weak self] data in
+        guard let self = self else { return }
+        self.tempLabel.text = "\(data.temperature)"
+        self.iconLabel.text = data.icon
+        self.humidityLabel.text = "\(data.humidity)"
+        self.cityNameLabel.text = data.cityName
+      })
+      .disposed(by: disposeBag)
+```
 
-​      .filter { ($0 ?? "").count > 0 }
 
-​      .flatMapLatest { text **in**
 
-​        **return** **ApiController**.shared.currentWeather(city: text ?? "Error")
 
-​          .catchErrorJustReturn(**ApiController**.**Weather**.empty)
-
-​      }
-
-​      .observeOn(**MainScheduler**.instance)
-
-​      .subscribe(onNext: { [**weak** **self**] data **in**
-
-​        **guard** **let** **self** = **self** **else** { **return** }
-
-​        **self**.tempLabel.text = "\(data.temperature)"
-
-​        **self**.iconLabel.text = data.icon
-
-​        **self**.humidityLabel.text = "\(data.humidity)"
-
-​        **self**.cityNameLabel.text = data.cityName
-
-​      })
-
-​      .disposed(by: disposeBag)
 
 textField의 rx 익스텐션 기능을 이용하여 입력받는 text 값을 제어합니다.
 
@@ -325,43 +286,37 @@ TextFiled 입력 -> Filter -> flatMap -> subscribe -> 작업 처리
 
 API 통신을 통하여 JSON 형태의 데이터를 받아올 것이며 response는 아래 형태와 같습니다.
 
+```json
  {
-
    "weather": [
-
-​     {
-
-​       "id": 741,
-
-​       "main": "Fog",
-
-​       "description": "fog",
-
-​       "icon": "50d"
-
-​     }
-
+     {
+       "id": 741,
+       "main": "Fog",
+       "description": "fog",
+       "icon": "50d"
+     }
    ],
-
  }
+```
+
+
+
+
 
 main 은 아래와 같이 온도와 습도를 표시하는데 이용할 데이터들을 묶어놓았습니다.
 
+```json
  "main": {
-
-​      "temp": 271.55,
-
-​      "pressure": 1043,
-
-​      "humidity": 96,
-
-​      "temp_min": 268.15,
-
-​      "temp_max": 273.15
-
-​    }
-
+      "temp": 271.55,
+      "pressure": 1043,
+      "humidity": 96,
+      "temp_min": 268.15,
+      "temp_max": 273.15
+    }
   }
+```
+
+
 
 통신을 통해 데이터를 가져오는데 이용할 함수는 아래와 같습니다.
 
@@ -477,7 +432,7 @@ JSON 타입 Observable 을 반환하는 buildRequest(pathComponent:params:) 메�
 
  
 
-**Observable** **바인딩**
+## **Observable** **바인딩**
 
 
 
@@ -617,7 +572,7 @@ viewDidLoad() 를 아래와 같이 변경합니다.
 
  
 
-**Traits****를 이용한 코드 개선**
+### **Traits** **를 이용한 코드 개선**
 
 
 
@@ -633,7 +588,7 @@ Trait 는 UI 작업에 대하여 직관적이고 작성하기 쉬운 코드를 �
 
  
 
-**ControlProperty** **와 Driver**
+### **ControlProperty** **와 Driver**
 
  
 

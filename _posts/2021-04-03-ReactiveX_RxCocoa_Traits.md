@@ -50,7 +50,7 @@ tag: [iOS]
 
 Swift는 애플리케이션의 정확성과 안정성 향상시키고 Rx를 보다 직관적이고 직접적인 경험으로 사용하는데 사용할수 있는 강력한 유형 시스템을 갖추고 있습니다. Traits는 모든 경계에서 사용할수 있는 원시 Observable과 비교할때 인터페이스 경계에서 observable 프로퍼티를 전달하고 보장하며, 문법적으로도 더 쉽고 구체적인 사용 사례를 타켓팅하는데 도움이됩니다…
 
-*Note: Trait**의* *일부는* *documnets(**예를들어서* `*Driver*`*)**에* *설명되어* *있습니다**.* [*https://github.com/ReactiveX/RxSwift/tree/master/RxCocoa*](https://github.com/ReactiveX/RxSwift/tree/master/RxCocoa)
+*Note: Trait* *의* *일부는* *documnets(* *예를들어서* `*Driver*`*)* *에* *설명되어* *있습니다* *.* [*https://github.com/ReactiveX/RxSwift/tree/master/RxCocoa*](https://github.com/ReactiveX/RxSwift/tree/master/RxCocoa)
 
 ### How they work
 
@@ -86,7 +86,7 @@ Single을 사용하는 일반적인 예는 응답, 오류만 반환할수 있는
 
 Single을 만드는것은 Observable을 만드는것과 비슷합니다. 아래의 간단한 예제를 살펴 봅니다.
 
-```
+```swift
 func getRepo(_ repo: String) -> Single<[String: Any]> {
     return Single<[String: Any]>.create { single in
         let task = URLSession.shared.dataTask(with: URL(string: "https://api.github.com/repos/\(repo)")!) { data, _, error in
@@ -112,9 +112,11 @@ func getRepo(_ repo: String) -> Single<[String: Any]> {
 }
 ```
 
+
+
 위의 함수를 만들고 아래처럼 사용할수 있습니다.
 
-```
+```swift
 getRepo("ReactiveX/RxSwift")
     .subscribe { event in
         switch event {
@@ -129,7 +131,7 @@ getRepo("ReactiveX/RxSwift")
 
 또는 `subscribe(onSuccess:onError:)` 을 아래 처럼 사용할수 있습니다.
 
-```
+```swift
 getRepo("ReactiveX/RxSwift")
     .subscribe(onSuccess: { json in
                    print("JSON: ", json)
@@ -160,7 +162,7 @@ subscription은 `SingleEvent` 타입의 요소를 포함하는 `.success`, `.err
 
 Completable을 생성하는것은 Observable과 비슷합니다. 아래의 간단한 예제를 봐주세요.
 
-```
+```swift
 func cacheLocally() -> Completable {
     return Completable.create { completable in
        // Store some data locally
@@ -180,7 +182,7 @@ func cacheLocally() -> Completable {
 
 위처럼 만들고 아래 처럼 사용할수 있습니다.
 
-```
+```swift
 cacheLocally()
     .subscribe { completable in
         switch completable {
@@ -195,7 +197,7 @@ cacheLocally()
 
 `subscribe(onCompleted:onError:)` 를 사용하여 아래처럼 사용합니다.
 
-```
+```swift
 cacheLocally()
     .subscribe(onCompleted: {
                    print("Completed with no error")
@@ -227,7 +229,7 @@ Maybe를 요소를 방출하는 연사자 모델을 위해 사용할수 있습�
 
 Maybe는 Observable만드는것과 비슷합니다. 아래의 예제를 확인합니다.
 
-```
+```swift
 func generateString() -> Maybe<String> {
     return Maybe<String>.create { maybe in
         maybe(.success("RxSwift"))
@@ -247,7 +249,7 @@ func generateString() -> Maybe<String> {
 
 아래 처럼 사용할수 있습니다.
 
-```
+```swift
 generateString()
     .subscribe { maybe in
         switch maybe {
@@ -264,7 +266,7 @@ generateString()
 
 `subscribe(onSuccess:onError:onCompleted:)`를 사용합니다.
 
-```
+```swift
 generateString()
     .subscribe(onSuccess: { element in
                    print("Completed with element \(element)")
@@ -313,7 +315,7 @@ E.g.
 
 아래의 코드는 전형적인 예시입니다.
 
-```
+```swift
 let results = query.rx.text
     .throttle(0.3, scheduler: MainScheduler.instance)
     .flatMapLatest { query in
@@ -346,7 +348,7 @@ results
 
 코드의 더 적절한 부분은 아래와 같습니다.
 
-```
+```swift
 let results = query.rx.text
     .throttle(0.3, scheduler: MainScheduler.instance)
     .flatMapLatest { query in
@@ -373,7 +375,7 @@ results
 
 아래의 코드는 거의 같습니다.
 
-```
+```swift
 let results = query.rx.text.asDriver()        // This converts a normal sequence into a `Driver` sequence.
     .throttle(0.3, scheduler: MainScheduler.instance)
     .flatMapLatest { query in
@@ -397,7 +399,7 @@ results
 
 첫번째로 `asDriver`매소드는 `ControlProperty` trait을 `Driver` trait으로
 
-```
+```swift
 query.rx.text.asDriver()
 ```
 
@@ -405,7 +407,7 @@ query.rx.text.asDriver()
 
 두번째로 변경되는것은
 
-```
+```swift
 .asDriver(onErrorJustReturn: [])
 ```
 
@@ -417,7 +419,7 @@ query.rx.text.asDriver()
 
 그렇다면 이러한 속성이 어떻게 충족되는지 확인하려면 어떻게 해야하나요? 그냥 정상적인 Rx연산자를 사용하고, asDriver(onErrorJustReturn: [])은 다음 코드와 동일합니다.
 
-```
+```swift
 let safeSequence = xs
   .observeOn(MainScheduler.instance)       // observe events on main scheduler
   .catchErrorJustReturn(onErrorJustReturn) // can't error out
@@ -459,7 +461,7 @@ UI요소의 속성을 나타내기위한 `Observable`/`ObservableType`을 위한
 
 `UISearchBar + Rx` 와 `UISegmentedControl + Rx`에서 매우 훌륭한 실제 예제를 찾을 수 있습니다.
 
-```
+```swift
 extension Reactive where Base: UISearchBar {
     /// Reactive wrapper for `text` property.
     public var value: ControlProperty<String?> {
@@ -518,7 +520,7 @@ UI요소의 이벤트를 나타내는 `Observable`/`ObservableType`을 위한 Tr
 
 아래는 전형적인 예제입니다.
 
-```
+```swift
 public extension Reactive where Base: UIViewController {
     
     /// Reactive wrapper for `viewDidLoad` message `UIViewController:viewDidLoad:`.
@@ -531,7 +533,7 @@ public extension Reactive where Base: UIViewController {
 
 UICollectionView + Rx 에서 아래와 같은 방법을 찾았다…
 
-```
+```swift
 extension Reactive where Base: UICollectionView {
     
     /// Reactive wrapper for `delegate` message `collectionView:didSelectItemAtIndexPath:`.
@@ -547,3 +549,4 @@ extension Reactive where Base: UICollectionView {
 ```
 
  
+
