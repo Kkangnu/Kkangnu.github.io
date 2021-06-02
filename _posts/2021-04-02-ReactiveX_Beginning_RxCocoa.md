@@ -18,7 +18,7 @@ tag: [iOS]
 
 ·     iOS, tvOS, macOS의 모든 플랫폼에서 동작
 
-**2. ObserverType****과** **ObservableType**
+**2. ObserverType** **과** **ObservableType**
 
 ·     ObserverType : 값을 주입(Inject)시킬 수 있는 타입
 
@@ -30,37 +30,44 @@ Subject 같이 프로퍼티에 새 값을 주입시킬 수 있고(ObserverType) 
 
 ·     예) UITextField+Rx.Swift의 text 프로퍼티는 ControlProperty
 
+```swift
 extension Reactive where Base: UITextField {
 
   /// Reactive wrapper for `text` property.
 
   public var text: ControlProperty<String?> {
 
-​    return value
+    return value
 
   }
 
   // 이후 내용 생략
 
 }
+```
+
+
 
 ·     ControlProperty는 ControlPropertyType를 따름
 
+```swift
 public struct ControlProperty<PropertyType> : ControlPropertyType {
-
 // 이후 내용 생략
-
 }
+```
 
 ·     ControlPropertyType은 ObservableType과 ObserverType을 따름을 확인
 
+```swift
 public protocol ControlPropertyType : ObservableType, ObserverType {
-
-  /// - returns: `ControlProperty` interface
-
-  func asControlProperty() -> ControlProperty<Element>
-
+    /// - returns: `ControlProperty` interface
+    func asControlProperty() -> ControlProperty<Element>
 }
+```
+
+
+
+
 
 **Binder**
 
@@ -70,29 +77,29 @@ o  특징 : error를 값으로 받을 수 없음. error가 주입되면 Binder�
 
 ·     예) UILabel+Rx.Swift에서 text 바인더 프로퍼티는 값을 주입만 시킬 수 있음.
 
+```swift
 extension Reactive where Base: UILabel {
+    /// Bindable sink for `text` property.
+    public var text: Binder<String?> {
+        return Binder(self.base) { label, text in
+            label.text = text
+        }
+    }
+```
 
-  /// Bindable sink for `text` property.
 
-  public var text: Binder<String?> {
-
-​    return Binder(self.base) { label, text in
-
-​      label.text = text
-
-​    }
-
-  }
 
 ·     Binder는 ObserverType를 따름을 확인
 
+```swift
 public struct Binder<Value>: ObserverType {
-
 // 이후 내용 생략
-
 }
+```
 
-**3. Observable****의** **Binding**
+
+
+**3. Observable** **의** **Binding**
 
 RxCocoa에서 binding은 단방향 binding                               
 
@@ -106,7 +113,7 @@ RxCocoa에서 binding은 단방향 binding
 
 Trait이란? UI 작업시 코드를 쉽고 직관적으로 작성해 사용할 수 있도록 도와주는 특별한 Observable 클래스의 모음
 
-**Trait****의** **규칙**
+**Trait** **의** **규칙**
 
 ·     error를 방출하지 않음
 
@@ -116,7 +123,7 @@ Trait이란? UI 작업시 코드를 쉽고 직관적으로 작성해 사용할 �
 
 ·     Signal을 제외한 나머지 Trait은 자원을 공유함(e.g share(replay:1))
 
-**RxCocoa****의** **Traits**
+**RxCocoa** **의** **Traits**
 
 ·     ControlProperty : 컨트롤에 data를 binding 하기 위해 사용 (rx namespace 사용)
 
@@ -128,21 +135,19 @@ Trait이란? UI 작업시 코드를 쉽고 직관적으로 작성해 사용할 �
 
 o  Signal은 event모델링에 유용하고, Driver는 state모델링에 더 적합
 
-**Driver****와** **ControlProperty****의** **사용**
+**Driver** **와** **ControlProperty** **의** **사용**
 
+```swift
 let search = searchCityName.rx.text.orEmpty
+	.filter { !$0.isEmpty }
+	.flatMapLatest { text in 
+	return ApiController.shared.currentWeather(city: text)
+	.catchErrorJustReturn(ApiController.Weather.empty)
+	}
+	.asDriver(onErrorJustReturn: ApiController.Weather.empty)
+```
 
-   .filter { !$0.isEmpty }
 
-   .flatMapLatest { text in 
-
-   return ApiController.shared.currentWeather(city: text)
-
-   .catchErrorJustReturn(ApiController.Weather.empty)
-
-   }
-
-   .asDriver(onErrorJustReturn: ApiController.Weather.empty)
 
 ·     **.asDriver(onErrorJustReturn:)** : Observable에서 error가 방출됐을때 Driver에서 error 대신 지정한 기본 값을 리턴하도록 만들어 Driver에서 error가 방출되는 것을 막음
 
@@ -150,54 +155,42 @@ let search = searchCityName.rx.text.orEmpty
 
 ·     변경 전 : bind(to:) 사용
 
+```swift
 search.map { $0.icon }
-
-  .bind(to: iconLabel.rx.text)
-
-  .disposed(by: bag)
-
- 
+   .bind(to: iconLabel.rx.text)
+   .disposed(by: bag)
 
 search.map { "\($0.humidity)%"}
-
-  .bind(to: humidityLabel.rx.text)
-
-  .disposed(by: bag)
-
- 
+   .bind(to: humidityLabel.rx.text)
+   .disposed(by: bag)
 
 search.map { $0.cityName }
-
-  .bind(to: cityNameLabel.rx.text)
-
-  .disposed(by: bag)
+   .bind(to: cityNameLabel.rx.text)
+   .disposed(by: bag)
+```
 
 ·     변경 후 : drive사용
 
+```swift
 search.map { $0.icon }
-
-  .drive(iconLabel.rx.text)
-
-  .disposed(by: bag)
-
- 
+   .drive(iconLabel.rx.text)
+   .disposed(by: bag)
 
 search.map { "\($0.humidity)%"}
-
-  .drive(humidityLabel.rx.text)
-
-  .disposed(by: bag)
-
- 
+   .drive(humidityLabel.rx.text)
+   .disposed(by: bag)
 
 search.map { $0.cityName }
+   .drive(cityNameLabel.rx.text)
+   .disposed(by: bag)
+```
 
-  .drive(cityNameLabel.rx.text)
-
-  .disposed(by: bag)
-
-**5. RxSwift****와** **RxCocoa****에서의** **Traits**
+**5. RxSwift** **와** **RxCocoa** **에서의** **Traits**
 
  ![image-20210526201210681](C:\Users\Rhee\AppData\Roaming\Typora\typora-user-images\image-20210526201210681.png)
 
- 
+
+
+출처: [[토미의 개발노트](https://jusung.github.io/RxSwift-Section12/)] 
+
+내용: [[토미의 개발노트](https://jusung.github.io/RxSwift-Section12/)]

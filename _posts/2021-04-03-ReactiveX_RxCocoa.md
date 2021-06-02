@@ -112,8 +112,14 @@ bind(to:) 메소드는 메인스레드 실행을 보장함.
 
 위와 같이 main Thread로 전환하고 subscribe 할 필요 없이 bind를 이용하면 두 가지 모두 한번에 해결된다.
 
-| **textField**.rx.text<br />.orEmpty<br />.bind(**to**: **valueLabel**.rx.text)<br />.disposed(**by**: **disposeBag**) |
-| ------------------------------------------------------------ |
+```swift
+textField.rx.text
+    .orEmpty
+    .bind(to: valueLabel.rx.text)
+    .disposed(by: disposeBag)
+```
+
+
 
 즉 Binder를 이용하면 binding 작업을 언제나 Main Thread에서 실행해주기 때문에 쓰레드에 대한 관리를 해 줄 필요가 없다는 장점이 있음.
 
@@ -186,7 +192,7 @@ func currentWeather(city: String) ->
 
  
 
-![image](file:///C:/Users/Rhee/AppData/Local/Temp/msohtmlclip1/01/clip_image001.png)
+![image](https://user-images.githubusercontent.com/33051018/100315639-53418900-2ffc-11eb-9282-bfeef3f4f857.png)
 
  
 
@@ -268,7 +274,7 @@ filter 를 통해 입력값의 유효성을 간단히 검증하고 flatMapLatest
 
  
 
-![image](file:///C:/Users/Rhee/AppData/Local/Temp/msohtmlclip1/01/clip_image002.png)
+![image](https://user-images.githubusercontent.com/33051018/100316414-cdbed880-2ffd-11eb-9cbb-63fefb3f3bc7.png)
 
 작업 흐름은 위와 같습니다.
 
@@ -320,63 +326,37 @@ main 은 아래와 같이 온도와 습도를 표시하는데 이용할 데이�
 
 통신을 통해 데이터를 가져오는데 이용할 함수는 아래와 같습니다.
 
-**private** **func** **buildRequest**(method: String = "GET", pathComponent: String, params: [(String, String)]) -> **Observable**<**JSON**> {
+```swift
+private func buildRequest(method: String = "GET", pathComponent: String, params: [(String, String)]) -> Observable<JSON> {
 
- 
+        let url = baseURL.appendingPathComponent(pathComponent)
+        var request = URLRequest(url: url)
+        let keyQueryItem = URLQueryItem(name: "appid", value: apiKey)
+        let unitsQueryItem = URLQueryItem(name: "units", value: "metric")
+        let urlComponents = NSURLComponents(url: url, resolvingAgainstBaseURL: true)!
 
-​    **let** url = baseURL.appendingPathComponent(pathComponent)
+        if method == "GET" {
+            var queryItems = params.map { URLQueryItem(name: $0.0, value: $0.1) }
+            queryItems.append(keyQueryItem)
+            queryItems.append(unitsQueryItem)
+            urlComponents.queryItems = queryItems
+        } else {
+            urlComponents.queryItems = [keyQueryItem, unitsQueryItem]
 
-​    **var** request = **URLRequest**(url: url)
+            let jsonData = try! JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
+            request.httpBody = jsonData
+        }
 
-​    **let** keyQueryItem = **URLQueryItem**(name: "appid", value: apiKey)
+        request.url = urlComponents.url!
+        request.httpMethod = method
 
-​    **let** unitsQueryItem = **URLQueryItem**(name: "units", value: "metric")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-​    **let** urlComponents = **NSURLComponents**(url: url, resolvingAgainstBaseURL: **true**)!
+        let session = URLSession.shared
 
- 
-
-​    **if** method == "GET" {
-
-​      **var** queryItems = params.map { **URLQueryItem**(name: $0.0, value: $0.1) }
-
-​      queryItems.append(keyQueryItem)
-
-​      queryItems.append(unitsQueryItem)
-
-​      urlComponents.queryItems = queryItems
-
-​    } **else** {
-
-​      urlComponents.queryItems = [keyQueryItem, unitsQueryItem]
-
- 
-
-​      **let** jsonData = **try**! **JSONSerialization**.data(withJSONObject: params, options: .prettyPrinted)
-
-​      request.httpBody = jsonData
-
-​    }
-
- 
-
-​    request.url = urlComponents.url!
-
-​    request.httpMethod = method
-
- 
-
-​    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
- 
-
-​    **let** session = **URLSession**.shared
-
- 
-
-​    **return** session.rx.data(request: request).map { **try** **JSON**(data: $0) }
-
-  }
+        return session.rx.data(request: request).map { try JSON(data: $0) }
+    }
+```
 
 RxCocoa의 URLSession wrapper를 이용하여 네트워크 요청을 보내며 동작은 아래와 같습니다.
 
@@ -384,35 +364,35 @@ RxCocoa의 URLSession wrapper를 이용하여 네트워크 요청을 보내며 �
 - application/json 에 요청 콘텐츠 타입으 설정합니다.
 - JSON 객체로 데이터를 매핑하여 반환합니다.
 
- 
+ ```sw
+ return session.rx.data(request: request).map { try JSON(data: $0)}
+ ```
 
-**return** session.rx.**data**(request: request).map { **try** JSON(**data**: $0)}
+
 
 해당 부분이 request를 통해 받은 Data타입의 response를 JSON 타입의 Observable로 매핑하여 반환하는 부분입니다.
 
  
 
-![image](file:///C:/Users/Rhee/AppData/Local/Temp/msohtmlclip1/01/clip_image003.png)
+![image](https://user-images.githubusercontent.com/33051018/100317363-92bda480-2fff-11eb-8ce9-e438f7a8f645.png)
 
 앞서 더미 데이터를 가져오는데 이용했던 함수 currentWeather(city:) 를 아래와 같이 변경합니다.
 
-**func** **currentWeather**(city: String) -> **Observable**<**Weather**> {
 
-​    **return** buildRequest(pathComponent: "weather", params: [("q", city)])
 
-​      .**map** { json in
+```swift
+func currentWeather(city: String) -> Observable<Weather> {
+        return buildRequest(pathComponent: "weather", params: [("q", city)])
+            .map { json in
+                return Weather(cityName: json["name"].string ?? "Unknown",
+                    temperature: json["main"]["temp"].int ?? -1000,
+                    humidity: json["main"]["humidity"].int ?? 0,
+                    icon: iconNameToChar(icon: json["weather"][0]["icon"].string ?? "e"))
+        }
+    }
+```
 
-​        **return** Weather(cityName: json["name"].**string** ?? "Unknown",
 
-​          temperature: json["main"]["temp"].**int** ?? -1000,
-
-​          humidity: json["main"]["humidity"].**int** ?? 0,
-
-​          icon: iconNameToChar(icon: json["weather"][0]["icon"].**string** ?? "e"))
-
-​    }
-
-  }
 
 JSON 타입 Observable 을 반환하는 buildRequest(pathComponent:params:) 메소드를 반환합니다.
 
@@ -426,7 +406,7 @@ JSON 타입 Observable 을 반환하는 buildRequest(pathComponent:params:) 메�
 
  
 
-![image](file:///C:/Users/Rhee/AppData/Local/Temp/msohtmlclip1/01/clip_image004.png)
+![image](https://user-images.githubusercontent.com/33051018/100319940-d1edf480-3003-11eb-815f-8c2c07072120.png)
 
 실시간으로 API를 통해 받아온 데이터를 기반으로 UI에 정상적으로 뿌려지는 것을 확인할 수 있습니다.
 
@@ -444,7 +424,7 @@ RxCocoa의 바인딩은 단방향 데이터 스트림입니다.
 
 두 개의 연결된 속성에 대한 관계를 생각해보면 이해가 한결 쉽습니다.
 
-![image](file:///C:/Users/Rhee/AppData/Local/Temp/msohtmlclip1/01/clip_image005.png)
+![image](https://user-images.githubusercontent.com/33051018/100320088-09f53780-3004-11eb-9630-da2118661012.png)
 
  
 
@@ -486,77 +466,45 @@ Receiver가 값을 수신하면 이를 처리합니다.
 
 viewDidLoad() 를 아래와 같이 변경합니다.
 
- 
+```swift
+override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
 
-**override** **func** **viewDidLoad**() {
+        style()
 
-​    **super**.viewDidLoad()
+        // 1
+        let search = searchCityName.rx.text
+            .filter { ($0 ?? "").count > 0 }
+            .flatMapLatest { text in
+                return ApiController.shared.currentWeather(city: text ?? "Error")
+            }
+            .share(replay: 1)
+            .observeOn(MainScheduler.instance)
 
-​    // Do any additional setup after loading the view, typically from a nib.
 
- 
+        // 2
+        search.map { "\($0.temperature)℃"}
+            .bind(to: tempLabel.rx.text)
+            .disposed(by: disposeBag)
 
-​    style()
+        // 3
+        search.map { "\($0.humidity)%"}
+            .bind(to: humidityLabel.rx.text)
+            .disposed(by: disposeBag)
 
- 
+        search.map { "\($0.cityName)"}
+            .bind(to: cityNameLabel.rx.text)
+            .disposed(by: disposeBag)
 
-​    // 1
+        search.map { "\($0.icon)"}
+            .bind(to: iconLabel.rx.text)
+            .disposed(by: disposeBag)
 
-​    **let** search = searchCityName.rx.text
-
-​      .filter { ($0 ?? "").count > 0 }
-
-​      .flatMapLatest { text **in**
-
-​        **return** **ApiController**.shared.currentWeather(city: text ?? "Error")
-
-​      }
-
-​      .share(replay: 1)
-
-​      .observeOn(**MainScheduler**.instance)
-
- 
-
- 
-
-​    // 2
-
-​    search.map { "\($0.temperature)℃"}
-
-​      .bind(to: tempLabel.rx.text)
-
-​      .disposed(by: disposeBag)
+            }
+```
 
  
-
-​    // 3
-
-​    search.map { "\($0.humidity)%"}
-
-​      .bind(to: humidityLabel.rx.text)
-
-​      .disposed(by: disposeBag)
-
- 
-
-​    search.map { "\($0.cityName)"}
-
-​      .bind(to: cityNameLabel.rx.text)
-
-​      .disposed(by: disposeBag)
-
- 
-
-​    search.map { "\($0.icon)"}
-
-​      .bind(to: iconLabel.rx.text)
-
-​      .disposed(by: disposeBag)
-
- 
-
-​      }
 
 주석을 따라서 살펴보도록 하겠습니다.
 
@@ -566,7 +514,7 @@ viewDidLoad() 를 아래와 같이 변경합니다.
 
 - - Weather.temperature 값을 tempLabel.rx.text 에 바인드하는 것 처럼 모든 label에 적절한 값을 바인딩합니다.
 
-![image](file:///C:/Users/Rhee/AppData/Local/Temp/msohtmlclip1/01/clip_image006.png)
+![image](https://user-images.githubusercontent.com/33051018/100321386-f0ed8600-3005-11eb-9a0d-85f2f86d2071.png)
 
 이와 같이 Weather 타입 모델링을 통해 가독성 높은 재사용 가능 코드로 전환이 가능합니다.
 
@@ -610,19 +558,14 @@ Trait을 이용하면 앞서 UI 작업을 위해 호출했던 .observeOn(MainSch
 
 기존의 코드를 ControlProperty 와 Driver를 이용하여 리팩토링 해보겠습니다.
 
- 
-
-**let** search = searchCityName.rx.text
-
-​      .filter { ($0 ?? "").count > 0 }
-
-​      .flatMapLatest { text **in**
-
-​        **return** **ApiController**.shared.currentWeather(city: text ?? "Error")
-
-​      }
-
-​      .asDriver(onErrorJustReturn: **ApiController**.**Weather**.empty)  // error 핸들링
+```swift
+let search = searchCityName.rx.text
+            .filter { ($0 ?? "").count > 0 }
+            .flatMapLatest { text in
+                return ApiController.shared.currentWeather(city: text ?? "Error")
+            }
+            .asDriver(onErrorJustReturn: ApiController.Weather.empty)   // error 핸들링
+```
 
 위 코드에서 중요한 부분은 제일 마지막 줄 입니다.
 
@@ -638,34 +581,25 @@ Trait을 이용하면 앞서 UI 작업을 위해 호출했던 .observeOn(MainSch
 
 따라서 바인딩 로직 코드를 아래와 같이 고쳐줍니다.
 
-search.**map** { "\($0.temperature)℃"}
+```swift
+search.map { "\($0.temperature)℃"}
+            .drive(tempLabel.rx.text)
+            .disposed(by: disposeBag)
 
-​      .drive(tempLabel.rx.text)
+        search.map { "\($0.humidity)%" }
+            .drive(humidityLabel.rx.text)
+            .disposed(by: disposeBag)
 
-​      .disposed(by: disposeBag)
+        search.map { $0.cityName }
+            .drive(cityNameLabel.rx.text)
+            .disposed(by: disposeBag)
 
- 
+        search.map { $0.icon }
+            .drive(iconLabel.rx.text)
+            .disposed(by: disposeBag)
+```
 
-​    search.**map** { "\($0.humidity)%" }
+출처: [[Y3oj4eng ' s Blog](https://duwjdtn11.tistory.com/)]
 
-​      .drive(humidityLabel.rx.text)
+내용: [[Y3oj4eng ' s Blog](https://duwjdtn11.tistory.com/)]
 
-​      .disposed(by: disposeBag)
-
- 
-
-​    search.**map** { $0.cityName }
-
-​      .drive(cityNameLabel.rx.text)
-
-​      .disposed(by: disposeBag)
-
- 
-
-​    search.**map** { $0.icon }
-
-​      .drive(iconLabel.rx.text)
-
-​      .disposed(by: disposeBag)
-
- 
