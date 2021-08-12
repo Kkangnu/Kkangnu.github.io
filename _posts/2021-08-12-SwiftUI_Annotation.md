@@ -1,12 +1,13 @@
-
-
-```markdown
 ---
+layout: post
 title: "SwiftUI) Annotation"
-date: 2021-08-12  15:58:28 -0400
-categories: iOS
+subtitle: "스유 @State, @ObservedObject, @EnvironmentObject"
+date: 2021-05-20 21:36:13 0400
+background: '/img/posts/06.jpg'
+categories: [iOS]
+tag: [iOS]
+
 ---
-```
 
 
 
