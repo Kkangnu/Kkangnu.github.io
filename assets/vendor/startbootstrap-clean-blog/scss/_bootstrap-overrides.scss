@@ -111,3 +111,11 @@ pre.highlight {
   padding: 20px;
   white-space: pre-wrap;
 }
+
+blockquote {
+  border-left: 7px solid #b83131;
+  background: #ebebeb;
+  margin: 1.5em 25px;
+  padding: 1px 10px;
+  quotes:"\201C""\201D""\2018""\2019";
+}
