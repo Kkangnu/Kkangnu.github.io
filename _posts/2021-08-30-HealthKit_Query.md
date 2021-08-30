@@ -1,4 +1,3 @@
-``````markdown
 ---
 layout: post
 title: "HealthKit Query 종류"
@@ -7,8 +6,9 @@ date: 2021-08-30  09:58:28 -0400
 background: '/img/posts/06.jpg'
 categories: [iOS]
 tag: [iOS]
+
+
 ---
-``````
 
 # ***HealthKit Query 종류***
 
@@ -20,7 +20,7 @@ tag: [iOS]
 
 + 선언
 
-```Swift
+```swift
 class HKQuery : NSObject
 ```
 
@@ -36,7 +36,7 @@ class HKQuery : NSObject
 
 * 선언
 
-```Swift
+```swift
 class HKSampleQuery : HKQuery
 ```
 
